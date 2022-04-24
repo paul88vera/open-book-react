@@ -6,15 +6,22 @@ import Axios from "axios";
 function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [userlist, setUserlist] = useState([]);
+
+  useEffect(() => {
+    Axios.get("http://localhost:3001/api/users").then((response) => {
+      setUserlist(response.data);
+      console.log(response.data);
+    });
+  }, []);
 
   const submitForm = () => {
     Axios.post("http://localhost:3001/api/log", {
       username: username,
       password: password,
-    })
-    .then(() => {
-      console.log('Success!');
-    })
+    }).then(() => {
+      console.log("Success!");
+    });
   };
 
   return (
@@ -32,7 +39,6 @@ function App() {
           />
         </label>
         <label>
-          {" "}
           Password:
           <input
             type="password"
@@ -44,6 +50,9 @@ function App() {
         </label>
         <button onClick={submitForm}>Submit</button>
       </form>
+      {userlist.map((val) => {
+        return <h5>User: {val.Username} <br/> Password: {val.Password}</h5>;
+      })}
     </div>
   );
 }
