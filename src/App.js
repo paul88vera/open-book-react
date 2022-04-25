@@ -10,10 +10,15 @@ function App() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  //eslint-disable-next-line
   const [userlist, setUserlist] = useState([]);
 
+  const [loginStatus, setLoginStatus] = useState(false);
+
+  Axios.defaults.withCredentials = true;
+
   useEffect(() => {
-    Axios.get("http://localhost:3001/users")
+    Axios.get("https://demo.inleague.io/api/v1/authenticate")
       .then((response) => {
         setUserlist(response.data);
       })
@@ -23,34 +28,40 @@ function App() {
   }, []);
 
   const login = () => {
-    Axios.post("http://localhost:3001/login", {
+    Axios.post("https://demo.inleague.io/api/v1/authenticate", {
       username: username,
       password: password,
-    })
-      .then((response) => {
-        console.log("Success!", response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    }).then((response) => {
+      console.log(response);
+      if (!response.data.auth) {
+        setLoginStatus(false);
+      } else {
+        console.log(response.data);
+        localStorage.setItem("token", response.data);
+        setLoginStatus(true);
+      }
+    });
   };
 
-  const submitForm = () => {
-    Axios.post("http://localhost:3001/register", {
+  const register = () => {
+    Axios.post("https://demo.inleague.io/api/v1/authenticate", {
       username: usernameReg,
       password: passwordReg,
-    })
-      .then((response) => {
-        console.log("Success!", response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    //* trying something here... erase in a bit
-    // .then(() => {
-    //   return loggedIn;
-    // })
+    }).then(() => {
+      console.log("You're Registered!");
+    });
   };
+
+  // TODO For a button to check Authentication
+  // const userAuthenticated = () => {
+  //   Axios.get("http://localhost:3001/UserAuth", {
+  //     headers: {
+  //       "x-access-token": "pv88era",
+  //     },
+  //   }).then((response) => {
+  //     console.log(response);
+  //   });
+  // };
 
   return (
     <div className="App">
@@ -61,12 +72,9 @@ function App() {
           <input
             type="text"
             name="Username"
+            autoComplete="username"
             onChange={(e) => {
-              if (!login) {
-                setUsernameReg(e.target.value);
-              } else {
-                setUsername(e.target.value);
-              }
+              setUsername(e.target.value);
             }}
           />
         </label>
@@ -75,27 +83,52 @@ function App() {
           <input
             type="password"
             name="Password"
+            autoComplete="current-password"
             onChange={(e) => {
-              if (!login) {
-                setPasswordReg(e.target.value);
-              } else {
-                setPassword(e.target.value);
-              }
+              setPassword(e.target.value);
             }}
           />
         </label>
         <button onClick={login}>Login</button>
-        <br />
-        <a onClick={submitForm}>Register</a>
       </form>
-      {/* <Login /> */}
-      {userlist.map((val) => {
+
+      <form>
+        <h5>Register</h5>
+        <label>
+          Username:
+          <input
+            type="text"
+            name="Username"
+            autoComplete="username"
+            onChange={(e) => {
+              setUsernameReg(e.target.value);
+            }}
+          />
+        </label>
+        <label>
+          Password:
+          <input
+            type="password"
+            name="Password"
+            autoComplete="current-password"
+            onChange={(e) => {
+              setPasswordReg(e.target.value);
+            }}
+          />
+        </label>
+        <button onClick={register}>Register</button>
+      </form>
+
+      <h3>{loginStatus}</h3>
+
+      {/* <Login isLoggedIn={true} /> */}
+      {/* {userlist.map((val) => {
         return (
-          <h5>
+          <div >
             User: {val.Username} <br /> Password: {val.Password}
-          </h5>
+          </div>
         );
-      })}
+      })} */}
     </div>
   );
 }
